@@ -23,7 +23,8 @@ export class Falling {
         this.r = 0 ;
         this.type =  piece.type;
     }
-    rotSound() {
+    rotEx() {
+        this.y = Math.floor(this.y) + 0.5;
         this.engine.audio.beepSmooth(notes["C3"], 0.01, 0.01, "triangle");
     }
 
@@ -139,7 +140,7 @@ export class Falling {
                 this.y -= kickTable[i][1];
             }
             if(!this.isColliding(this.ax, this.ay)) {
-                this.rotSound();
+                this.rotEx();
                 return true;
             }
         }
@@ -159,7 +160,7 @@ export class Falling {
             if (this.isColliding(this.ax, this.ay)) {
                 this.r = rotationIndex;
             } else {
-                this.rotSound();
+                this.rotEx();
             }
         }
     }
@@ -175,7 +176,7 @@ export class Falling {
             if (this.isColliding(this.ax, this.ay)) {
                 this.r = rotationIndex;
             } else {
-                this.rotSound();
+                this.rotEx();
             }
         }
     }
@@ -194,7 +195,7 @@ export class Falling {
             if (this.isColliding(this.ax, this.ay)) {
                 this.r = rotationIndex;
             } else {
-                this.rotSound();
+                this.rotEx();
             }
         }
     }
