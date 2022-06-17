@@ -19,18 +19,18 @@ export class RenderLoop {
         }
     }
     get isActive() {
-        return this.drawFrame !== undefined
+        return this.drawFrame !== undefined;
     }
     private internalDraw = () => {
         const now = performance.now();
         const delta = clamp(now - this.lastPref, 0, 50) ;
-        this.lastPref = now
-        const fps = Math.round(1000 / delta)
+        this.lastPref = now;
+        const fps = Math.round(1000 / delta);
         this.draw(delta, fps);
         this.drawFrame = requestAnimationFrame(this.internalDraw);
-    }
+    };
     get updateRate() {
-        return this._updateRate
+        return this._updateRate;
     }
     set updateRate(value: number) {
         this._updateRate = value;

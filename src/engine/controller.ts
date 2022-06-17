@@ -19,29 +19,20 @@ interface KeyDef {
     rapid: boolean;
 }
 
-type Keys = "left" | "right" | "up" | "down" |
-"hard_drop" | "soft_drop" |
-"spin_clockwise" | "spin_anti_clockwise" | "spin_180" | 
-"swap" | "escape"
-
-type KeyMapper = {
-    [key in Keys]: KeyDef;
-};   
-
 type CB = (data: Control) => void;
 
 const KEY_MAP: KeyDef[] = [
-    { type:Control.RotateCW ,code: 'ArrowUp', key: 'ArrowUp', keyCode: 38, rapid: false},
-    { type:Control.SoftDrop ,code: 'ArrowDown', key: 'ArrowDown', keyCode: 40, rapid: true},
-    { type:Control.Left ,code: 'ArrowLeft', key: 'ArrowLeft', keyCode: 37, rapid: true},
-    { type:Control.Right ,code: 'ArrowRight', key: 'ArrowRight', keyCode: 39, rapid: true},
-    { type:Control.SoftDrop ,code: 'ArrowDown', key: 'ArrowDown', keyCode: 40, rapid: true},
-    { type:Control.HardDrop ,code: 'Space', key: ' ', keyCode: 32, rapid: false},
-    { type:Control.RotateCCW ,code: 'ControlLeft', key: 'Control', keyCode: 17, rapid: false},
-    { type:Control.Rotate180 ,code: 'KeyA', key: 'a', keyCode: 65, rapid: false},
-    { type:Control.Hold ,code: 'ShiftLeft', key: 'Shift', keyCode: 16, rapid: false},
-    { type:Control.Escape ,code: 'Escape', key: 'Escape', keyCode: 27, rapid: true}
-] 
+    { type:Control.RotateCW ,code: "ArrowUp", key: "ArrowUp", keyCode: 38, rapid: false},
+    { type:Control.SoftDrop ,code: "ArrowDown", key: "ArrowDown", keyCode: 40, rapid: true},
+    { type:Control.Left ,code: "ArrowLeft", key: "ArrowLeft", keyCode: 37, rapid: true},
+    { type:Control.Right ,code: "ArrowRight", key: "ArrowRight", keyCode: 39, rapid: true},
+    { type:Control.SoftDrop ,code: "ArrowDown", key: "ArrowDown", keyCode: 40, rapid: true},
+    { type:Control.HardDrop ,code: "Space", key: " ", keyCode: 32, rapid: false},
+    { type:Control.RotateCCW ,code: "ControlLeft", key: "Control", keyCode: 17, rapid: false},
+    { type:Control.Rotate180 ,code: "KeyA", key: "a", keyCode: 65, rapid: false},
+    { type:Control.Hold ,code: "ShiftLeft", key: "Shift", keyCode: 16, rapid: false},
+    { type:Control.Escape ,code: "Escape", key: "Escape", keyCode: 27, rapid: true}
+]; 
 type ActiveControl = { type: Control, rapid: boolean, pressed: boolean }
 
 export class Controller {
@@ -60,7 +51,7 @@ export class Controller {
         window.removeEventListener("keyup", this.keyUp);
         if(this.frame) {
             this.frame = undefined;
-            clearInterval(this.frame)
+            clearInterval(this.frame);
         }
     }
     get isActive() {
@@ -85,7 +76,7 @@ export class Controller {
                 key.pressed = true;
             }
         }
-    }
+    };
 
     private getMappedObject = (event: KeyboardEvent): KeyDef => {
         for (const MAP of KEY_MAP) {
@@ -93,18 +84,18 @@ export class Controller {
                 return MAP;
             }
         }
-    }
+    };
 
     private keyDown = (event: KeyboardEvent) => {
         const obj = this.getMappedObject(event);
         if (obj) {
             const exist = this.active.find(e => e.type === obj.type);
             if (!exist) {
-                this.active.push({type: obj.type, rapid: obj.rapid, pressed: false})
+                this.active.push({type: obj.type, rapid: obj.rapid, pressed: false});
             }
         }
 
-    }
+    };
     private keyUp = (event: KeyboardEvent) => {
         const obj = this.getMappedObject(event);
         if (obj) {
@@ -114,5 +105,5 @@ export class Controller {
                 this.active.splice(index, 1);
             }
         }
-    }
+    };
 }

@@ -79,11 +79,11 @@ export class Falling {
         if (!this.isColliding(this.ax, this.ay + 1)) {
             this.y += 1;
             this.engine.score++;
-            this.y = Math.round(this.y)
+            this.y = Math.round(this.y);
             this.engine.audio.beepSmooth(notes["A1"], 0.01, 0.01, "square");
         }
     }
-        hold() {
+    hold() {
         if (this.engine.hold.available) {
             if (!this.engine.hold.drop) {
                 this.engine.hold.available = false;
@@ -100,7 +100,7 @@ export class Falling {
     }
     hard() {
         let ay = 0;
-        let score = 0
+        let score = 0;
         for (let i = 0; i < this.engine.board.height; i++) {
             if (this.isColliding(this.ax, this.ay + i)) {
                 break;
@@ -123,7 +123,7 @@ export class Falling {
         const backup = {
             x: this.x,
             y: this.y,
-        }
+        };
         for (let i = 0; i < kickTable.length; i++) {
             this.x = backup.x;
             this.y = backup.y;
@@ -141,8 +141,8 @@ export class Falling {
             }
         }
         this.x = backup.x;
-        this.y = backup.y
-        return false
+        this.y = backup.y;
+        return false;
     }
     rotate180() {
         const rotationIndex = pieces[this.type].shape.indexOf(this.shape);
@@ -238,7 +238,7 @@ export class Falling {
             let lastI = 0; 
             for (let i = this.ay; i < this.engine.board.height; i++) {
                 if (!this.isColliding(this.ax, i)) {
-                    lastI = i
+                    lastI = i;
                 } else {
                     break;
                 }
@@ -249,14 +249,14 @@ export class Falling {
                     if (value) {
                         const xx = ax + x;
                         const yy = y + lastI;
-                        this.engine.boardRenderer.renderShadow(xx, yy)
+                        this.engine.boardRenderer.renderShadow(xx, yy);
                     }
                 }
             }
         }
 
 
-        return false
+        return false;
     }
 
     get ax() {
@@ -266,6 +266,6 @@ export class Falling {
         return Math.round(this.y);
     }
     get shape() {
-        return pieces[this.type].shape[this.r]
+        return pieces[this.type].shape[this.r];
     }
 }

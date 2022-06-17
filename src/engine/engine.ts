@@ -11,22 +11,22 @@ import { SmoothSync } from "./synthEngine";
 import { ComboSound } from "./comboSound";
 import { PieceRenderer } from "../renderer/pieceRenderer";
 import { TextRenderer } from "../renderer/textRenderer";
-import { Rotation } from "../pieces";;
+import { Rotation } from "../pieces";
 
 export class TetisEngine {
     bag: Bag;
     board: Board;   
     boardRenderer: BoardRenderer;
     settings = new Settings();
-    audio = new SmoothSync()
+    audio = new SmoothSync();
     private canvas: Canvas;
     private render: RenderLoop;
     private controller: Controller;
     private falling: Falling;
     comboSound = new ComboSound(this.audio);
     scoreRenderer: ScoreRenderer;
-    private textRenderer: TextRenderer
-    private combo = 0
+    private textRenderer: TextRenderer;
+    private combo = 0;
     private drop = false;
     score = 0; 
     private gameOverText: () => void;
@@ -47,9 +47,9 @@ export class TetisEngine {
         drop: GridPieceTypes,
         available: boolean;
     } = {
-        available: true,
-        drop: "",
-    }
+            available: true,
+            drop: "",
+        };
 
     constructor() {
         this.canvas = new Canvas();
@@ -70,51 +70,51 @@ export class TetisEngine {
         this.controller.register(c => {
             if (this.over){
                 if(c === Control.HardDrop) {
-                    this.reset()
+                    this.reset();
                 }
                 return;
             }
             switch(c) {
-                case Control.Left: {
-                    const s = this.falling.move(-1);
-                    if (!s) {
-                        this.boardRenderer.targetX += 10;
-                    }
-                    break;
+            case Control.Left: {
+                const s = this.falling.move(-1);
+                if (!s) {
+                    this.boardRenderer.targetX += 10;
                 }
-                case Control.Right: {
-                    const s = this.falling.move(1);
-                    if (!s) {
-                        this.boardRenderer.targetX -= 10;
-                    }
-                    break;
+                break;
+            }
+            case Control.Right: {
+                const s = this.falling.move(1);
+                if (!s) {
+                    this.boardRenderer.targetX -= 10;
                 }
-                case Control.SoftDrop: {
-                    this.falling.soft();
-                    break;
-                }
-                case Control.HardDrop: {
-                    this.falling.hard();
-                    this.drop = true;
-                    this.hold.available = true;
-                    break;
-                }
-                case Control.RotateCCW: {
-                    this.falling.rotateCCW();
-                    break;
-                }
-                case Control.RotateCW: {
-                    this.falling.rotateCW();
-                    break;
-                }
-                case Control.Rotate180: {
-                    this.falling.rotate180();
-                    break;
-                }
-                case Control.Hold: {
-                    this.falling.hold();
-                    break;
-                }
+                break;
+            }
+            case Control.SoftDrop: {
+                this.falling.soft();
+                break;
+            }
+            case Control.HardDrop: {
+                this.falling.hard();
+                this.drop = true;
+                this.hold.available = true;
+                break;
+            }
+            case Control.RotateCCW: {
+                this.falling.rotateCCW();
+                break;
+            }
+            case Control.RotateCW: {
+                this.falling.rotateCW();
+                break;
+            }
+            case Control.Rotate180: {
+                this.falling.rotate180();
+                break;
+            }
+            case Control.Hold: {
+                this.falling.hold();
+                break;
+            }
             }
         });
     }
@@ -172,7 +172,7 @@ export class TetisEngine {
                 this.textRenderer.push(`${this.allClear} +`, "side", "small");
                 this.score += this.allClear;
             } else {
-                const s =  this.lineScores[lines.length - 1]
+                const s =  this.lineScores[lines.length - 1];
                 const text = s[0] as string;
                 const score = s[1] as number;
                 this.textRenderer.push(text, "side", "big");
@@ -186,7 +186,7 @@ export class TetisEngine {
             this.boardRenderer.drop(10);
             this.combo = 0;
             this.comboSound.reset();
-            this.settings.gravity +=  0.00001
+            this.settings.gravity +=  0.00001;
             this.hold.available = true;
         }
         this.drop = false;
@@ -228,7 +228,7 @@ export class TetisEngine {
         this.holdRenderer.draw(delta);
         this.scoreRenderer.draw(delta);
         this.textRenderer.draw(delta);
-    }
+    };
 
     gameOver() {
         if (this.over) return;
@@ -247,7 +247,7 @@ export class TetisEngine {
             this.bag.getNext();
         }
         this.hold.available = true;
-        this.hold.drop = ""
+        this.hold.drop = "";
         this.board.clearBoard();
     }
 
