@@ -12,8 +12,11 @@ export class ComboSound {
         this.sync.beepSmooth(notes[this.scale[this.index]], 0.75, 0.75, "triangle");
         this.index = (this.index + 1);
         if (this.index > this.scale.length - 1) {
-            this.index = this.scale.length - 1
+            this.index = this.scale.length - 1;
         }
+    }
+    resetNoSound() {
+        this.index = 0;
     }
     reset() {
         if(this.index !== 0) {

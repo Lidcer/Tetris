@@ -7,11 +7,12 @@ import { ScoreRenderer } from "../renderer/score";
 import { Control, Controller } from "./controller";
 import { Falling } from "./falling";
 import { Settings } from "./settings";
-import { SmoothSync } from "./synthEngine";
+import { notes, SmoothSync } from "./synthEngine";
 import { ComboSound } from "./comboSound";
 import { PieceRenderer } from "../renderer/pieceRenderer";
 import { TextRenderer } from "../renderer/textRenderer";
 import { Rotation } from "../pieces";
+import { delay } from "../utils";
 
 export class TetisEngine {
     bag: Bag;
@@ -155,6 +156,18 @@ export class TetisEngine {
             ctx.fillText(lines[i], offset, lineHeight * i + lineHeight + offset);
         }
     }
+
+    playClearAll = async () => {
+        this.audio.beepSmooth(notes["A#1"], 0.05, 0.7, "sawtooth");
+        await delay(100);
+        this.audio.beepSmooth(notes["A#2"], 0.05, 0.7, "sawtooth");
+        await delay(100);
+        this.audio.beepSmooth(notes["A#3"], 0.05, 0.7, "sawtooth");
+        await delay(100);
+        this.audio.beepSmooth(notes["A#4"], 0.05, 0.7, "sawtooth");
+        await delay(100);
+        this.audio.beepSmooth(notes["A#5"], 0.05, 0.7, "sawtooth");
+    };
     update = (delta: number) => {
         this.boardRenderer.update();
         this.falling.update(delta);
@@ -171,6 +184,8 @@ export class TetisEngine {
                 this.textRenderer.push("All clear", "side", "big");
                 this.textRenderer.push(`${this.allClear} +`, "side", "small");
                 this.score += this.allClear;
+                this.playClearAll();
+                this.comboSound.resetNoSound();
             } else {
                 const s =  this.lineScores[lines.length - 1];
                 const text = s[0] as string;

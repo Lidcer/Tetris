@@ -40,3 +40,9 @@ export function fixRange(value: number, multiplayer: number, limit: number, sum:
 
     }
 }
+
+export function delay(ms: number) {
+    return new Promise(resolve => {
+        setTimeout(resolve, ms);
+    });
+}

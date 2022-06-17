@@ -84,16 +84,19 @@ export class Falling {
         }
     }
     hold() {
+        const s = () => this.engine.audio.beepSmooth(notes["A#3"], 0.05, 0.5, "sine");
         if (this.engine.hold.available) {
             if (!this.engine.hold.drop) {
                 this.engine.hold.available = false;
                 this.engine.hold.drop = this.type;
                 this.setupNext();
+                s();
             } else {
                 const type = this.engine.hold.drop;
                 this.engine.hold.drop = this.type;
                 this.engine.hold.available = false;
                 this.setupNext(pieces[type]);
+                s();
             }
 
         }
