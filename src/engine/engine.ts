@@ -58,7 +58,7 @@ export class TetisEngine {
         this.board = new Board(10, 20);   
         this.boardRenderer = new BoardRenderer(this.canvas, this.board, 30);
         this.holdRenderer = new PieceRenderer(this.canvas);
-        this.controller = new Controller();
+        this.controller = new Controller(this.settings.handling);
         this.render = new RenderLoop(this.draw);
         this.falling = new Falling(this);
         this.scoreRenderer = new ScoreRenderer(this.canvas, this.boardRenderer, this);
