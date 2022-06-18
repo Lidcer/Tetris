@@ -7,7 +7,8 @@ export class PieceRenderer implements Drawable, CanvasBase {
     private canvas = document.createElement("canvas");
     private context: CanvasRenderingContext2D;
     drawGrid = false;
-    size = 6;
+    wSize = 6;
+    hSize = 4;
     x = 50;
     y = 50;
     constructor(private mainCanvas: Canvas) {
@@ -35,7 +36,8 @@ export class PieceRenderer implements Drawable, CanvasBase {
         return 20;
     }
     resize = () => {
-        this.canvas.height = this.canvas.width = this.blockSize * this.size;
+        this.canvas.width = this.blockSize * this.wSize;
+        this.canvas.height = this.blockSize * this.hSize;
     };
     drawStroke(){
         this.context.strokeStyle = "#ffffff";
@@ -60,8 +62,8 @@ export class PieceRenderer implements Drawable, CanvasBase {
         this.context.clearRect(0,0, this.width, this.height);
         this.drawStroke();
         if (this.drawGrid) {
-            for (let x = 0; x < this.size; x++) {
-                for (let y = 0; y < this.size; y++) {
+            for (let x = 0; x < this.wSize; x++) {
+                for (let y = 0; y < this.hSize; y++) {
                     this.context.strokeStyle = "#ffffff";
                     this.context.strokeRect(x * this.blockSize, y * this.blockSize, this.blockSize, this.blockSize);
                 }   

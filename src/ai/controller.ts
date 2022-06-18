@@ -1,5 +1,5 @@
 import { random } from "lodash";
-import { LEFT, RIGHT, SOFT_DROP, ROTATE_CW, HARD_DROP, ROTATE_CCW, ROTATE180, HOLD, ESCAPE, KEY_MAP,KeyDef
+import { LEFT, RIGHT, SOFT_DROP, ROTATE_CW, HARD_DROP, ROTATE_CCW, ROTATE180, HOLD, KeyDef
 } from "../engine/controller";
 function createEvent(down: boolean, keyDef: KeyDef) {
     const cc = {...keyDef} as any;
