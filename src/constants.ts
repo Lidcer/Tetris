@@ -11,9 +11,8 @@ export const LINES_SCORES: Score[] = [
 ];
 
 export const SPIN_BONUS: Score[] = [
-    { name: "-spin Single", value: 100 },
-    { name: "-spin Double", value: 300 },
-    { name: "-spin Triple" , value: 500 },
-    { name: "-spin Quad"  , value: 800 }
+    { name: "-spin Single", value: 800 },
+    { name: "-spin Double", value: 1200 },
+    { name: "-spin Triple" , value: 1600 },
 ];
 export const CLEAR_ALL = 3500;
