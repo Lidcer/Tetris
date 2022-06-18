@@ -83,7 +83,7 @@ export class BoardRenderer implements Drawable, CanvasBase {
     }
     renderShadow(x: number, y: number) {
         if (this.blocks[y][x].color === this.backgroundColor) {
-            this.blocks[y][x].color = "#ffffff38";
+            this.blocks[y][x].color = "#ffffff20";
             this.blocks[y][x].drawOutline = false;
         }
     }
