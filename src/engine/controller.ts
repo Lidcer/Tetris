@@ -12,7 +12,7 @@ export enum Control {
     Rotate180,
     Escape,
 }
-interface KeyDef {
+export interface KeyDef {
     code: string;
     keyCode: number;
     key: string;
@@ -21,22 +21,21 @@ interface KeyDef {
 
 type CB = (data: Control) => void;
 
+export const LEFT: KeyDef = { type:Control.Left ,code: "ArrowLeft", key: "ArrowLeft", keyCode: 37};
+export const RIGHT: KeyDef = { type:Control.Right ,code: "ArrowRight", key: "ArrowRight", keyCode: 39};
+export const SOFT_DROP: KeyDef = { type:Control.SoftDrop ,code: "ArrowDown", key: "ArrowDown", keyCode: 40};
+export const ROTATE_CW: KeyDef = { type:Control.RotateCW ,code: "ArrowUp", key: "ArrowUp", keyCode: 38};
+export const HARD_DROP: KeyDef = { type:Control.HardDrop ,code: "Space", key: " ", keyCode: 32};
+export const ROTATE_CCW: KeyDef = { type:Control.RotateCCW ,code: "ControlLeft", key: "Control", keyCode: 17};
+export const ROTATE180: KeyDef = { type:Control.Rotate180 ,code: "KeyA", key: "a", keyCode: 65};
+export const HOLD: KeyDef = { type:Control.Hold ,code: "ShiftLeft", key: "Shift", keyCode: 16};
+export const ESCAPE: KeyDef = { type:Control.Escape ,code: "Escape", key: "Escape", keyCode: 27};
 
-const KEY_MAP: KeyDef[] = [
-    { type:Control.Left ,code: "ArrowLeft", key: "ArrowLeft", keyCode: 37},
-    { type:Control.Right ,code: "ArrowRight", key: "ArrowRight", keyCode: 39},
-    { type:Control.SoftDrop ,code: "ArrowDown", key: "ArrowDown", keyCode: 40},
-    { type:Control.RotateCW ,code: "ArrowUp", key: "ArrowUp", keyCode: 38},
-
-    { type:Control.HardDrop ,code: "Space", key: " ", keyCode: 32},
-    { type:Control.RotateCCW ,code: "ControlLeft", key: "Control", keyCode: 17},
-    { type:Control.Rotate180 ,code: "KeyA", key: "a", keyCode: 65},
-    { type:Control.Hold ,code: "ShiftLeft", key: "Shift", keyCode: 16},
-    { type:Control.Escape ,code: "Escape", key: "Escape", keyCode: 27}
+export const KEY_MAP: KeyDef[] = [
+    LEFT, RIGHT, SOFT_DROP, ROTATE_CW, HARD_DROP, ROTATE_CCW, ROTATE180, HOLD, ESCAPE,
 ]; 
 
-const sideways = [KEY_MAP[0], KEY_MAP[1]];
-const drop = KEY_MAP[2];
+const sideways = [LEFT, RIGHT];
 
 export class Controller {
     private cb: CB;
@@ -89,7 +88,7 @@ export class Controller {
                     this.map.set(sideways, repeat);
                 }, this.settings.DAS);
                 this.map.set(sideways, timeout);
-            } else if (key === drop) {
+            } else if (key === SOFT_DROP) {
 
                 if (this.map.has(key)) return;
                 this.cb(key.type);

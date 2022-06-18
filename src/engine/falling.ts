@@ -7,8 +7,8 @@ import { Scenario } from "../rotationPoints/pointsInterfaces";
 
 
 export class Falling {
-    private x = 1;
-    private y = 1;
+    private xx = 1;
+    private yy = 1;
     private type: PieceTypes = "i";
     private r: Rotation = Rotation.Zero;
     private lastRotation: "left" | "right" | "none" = "none";
@@ -20,8 +20,8 @@ export class Falling {
             piece = pieces[pieceType];
         }
         const x = Math.floor((this.engine.board.width * 0.5) - (piece.shape[0].length * 0.5)) - 1;
-        this.x = x;
-        this.y = this.engine.board.offset - 3;
+        this.xx = x;
+        this.yy = this.engine.board.offset - 3;
         this.r = 0 ;
         this.type =  piece.type;
     }
@@ -49,7 +49,7 @@ export class Falling {
         return false;
     }
     rotEx(cw?: boolean) {
-        this.y = Math.floor(this.y) + 0.5;
+        this.yy = Math.floor(this.yy) + 0.5;
         const r = (bonus: boolean) => {
             if (cw === undefined) {
                 if (this.lastRotation === "none" || this.lastRotation === "left") {
@@ -154,7 +154,7 @@ export class Falling {
     }
     move(x: number) {
         if (!this.isColliding(this.ax + x, this.ay)) {
-            this.x += x;
+            this.xx += x;
             this.engine.audio.beepSmooth(notes["A2"], 0.01, 0.01, "square");
             return true;
         }
@@ -162,9 +162,9 @@ export class Falling {
     }
     soft() {
         if (!this.isColliding(this.ax, this.ay + 1)) {
-            this.y += 1;
+            this.yy += 1;
             this.engine.score++;
-            this.y = Math.round(this.y) - .5;
+            this.yy = Math.round(this.yy) - .5;
             this.engine.audio.beepSmooth(notes["A1"], 0.01, 0.01, "square");
         }
     }
@@ -199,7 +199,7 @@ export class Falling {
         }
         this.engine.score += score * 2;
         //this.engine.audio.beepSmooth(notes["A1"], 0.75, 0.1, "sawtooth");
-        this.y = ay + 1;
+        this.yy = ay + 1;
         this.writeShape(this.ax, this.ay, this.shape);
         this.setupNext();
     }
@@ -209,27 +209,27 @@ export class Falling {
     performKickTable(kickTableDef: {[key in PieceTypes]: PieceRotation }, reverse?: boolean) {
         const kickTable = kickTableDef[this.type].kickTable[this.r];
         const backup = {
-            x: this.x,
-            y: this.y,
+            x: this.xx,
+            y: this.yy,
         };
         for (let i = 0; i < kickTable.length; i++) {
-            this.x = backup.x;
-            this.y = backup.y;
+            this.xx = backup.x;
+            this.yy = backup.y;
 
             if(reverse) {
-                this.x += kickTable[i][0];
-                this.y += kickTable[i][1];
+                this.xx += kickTable[i][0];
+                this.yy += kickTable[i][1];
             } else {
-                this.x -= kickTable[i][0];
-                this.y -= kickTable[i][1];
+                this.xx -= kickTable[i][0];
+                this.yy -= kickTable[i][1];
             }
             if(!this.isColliding(this.ax, this.ay)) {
                 this.rotEx(reverse);
                 return true;
             }
         }
-        this.x = backup.x;
-        this.y = backup.y;
+        this.xx = backup.x;
+        this.yy = backup.y;
         return false;
     }
     rotate180() {
@@ -285,7 +285,7 @@ export class Falling {
     }
 
     update(delta: number): boolean {
-        this.y += delta * this.engine.settings.gravity;
+        this.yy += delta * this.engine.settings.gravity;
         const ax = this.ax;
         const ay = this.ay;
         const shape = this.shape;
@@ -348,10 +348,16 @@ export class Falling {
     }
 
     get ax() {
-        return Math.round(this.x) + 1;
+        return Math.round(this.xx) + 1;
     }
     get ay() {
-        return Math.round(this.y);
+        return Math.round(this.yy);
+    }
+    get y() {
+        return this.yy;
+    }
+    get x() {
+        return this.xx + 2;
     }
     get shape() {
         return pieces[this.type].shape[this.r];

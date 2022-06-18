@@ -147,6 +147,10 @@ export class TetisEngine {
         //     x = 0
         // }
     }
+    stop() {
+        this.render.stop();
+        this.controller.stop();
+    }
 
     drawDebug(lines: string[]) {
         const ctx = this.canvas.ctx;

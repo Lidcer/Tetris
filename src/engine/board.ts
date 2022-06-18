@@ -5,7 +5,7 @@ export class Board {
     private grid: GridPieceTypes[][] = [];
     readonly offset = 20;
 
-    constructor(private _width: number,private _height: number) {
+    constructor(private _width: number, private _height: number) {
         for (let y = 0; y < _height + this.offset; y++) {
             const ref: GridPieceTypes[] = [];
             for (let x = 0; x < _width; x++) {
