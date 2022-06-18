@@ -1,15 +1,8 @@
-interface IEaseHandler {
-    target: number;
-    original: number;
-    duration: number;
-    time: number;
-}
-
 type EaseFn = (x: number) => number;
 export class EaseHandler {
     private actual = 0;
     private target = 0;
-    private initValue = 0
+    private initValue = 0;
     
     private time = 0;
     private duration = 0;
