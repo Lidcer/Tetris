@@ -15,7 +15,7 @@ export class ScoreRenderer implements Drawable {
         const ctx = this.mainCanvas.ctx;
         ctx.strokeStyle = "#FFFFFF";
         ctx.font = "30px KdamThmorPro";
-        this.mainCanvas.ctx.fillText(`SCORE: ${this.score.score}`,this.board.ax, this.board.ay + this.board.height + 30);
+        this.mainCanvas.fillText(`SCORE: ${this.score.score}`,this.board.ax, this.board.ay + this.board.height + 30);
     }
 
 }

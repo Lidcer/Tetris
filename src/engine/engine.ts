@@ -11,8 +11,10 @@ import { notes, SmoothSync } from "./synthEngine";
 import { ComboSound } from "./comboSound";
 import { PieceRenderer } from "../renderer/pieceRenderer";
 import { TextRenderer } from "../renderer/textRenderer";
-import { Rotation } from "../pieces";
+import { PieceTypes, Rotation } from "../pieces";
 import { delay } from "../utils";
+import { EaseHandler } from "./easeHandler";
+import { CLEAR_ALL, LINES_SCORES, SPIN_BONUS } from "../constants";
 
 export class TetisEngine {
     bag: Bag;
@@ -20,6 +22,14 @@ export class TetisEngine {
     boardRenderer: BoardRenderer;
     settings = new Settings();
     audio = new SmoothSync();
+    rotation = new EaseHandler(x => 1 - Math.pow(1 - x, 5), () => {
+    
+        if (this.rotation.value !== 0) {
+            const pr = 1 - (360 * Math.PI / 180) / 100;
+            const time = 1000;
+            this.rotation.setAnimator(0, time * pr);
+        }
+    });
     private canvas: Canvas;
     private render: RenderLoop;
     private controller: Controller;
@@ -29,17 +39,10 @@ export class TetisEngine {
     private textRenderer: TextRenderer;
     private combo = 0;
     private drop = false;
+    spinBonus?: PieceTypes;
     score = 0; 
     private gameOverText: () => void;
 
-    // Move somewhere else
-    private lineScores = [
-        ["Single",100],
-        ["Double",300],
-        ["Tripe" ,500],
-        ["Quad"  ,800]
-    ];
-    allClear = 3500;
 
     
     private holdRenderer: PieceRenderer;
@@ -182,17 +185,21 @@ export class TetisEngine {
             if(this.board.isEmpty()) {
                 this.textRenderer.push("All clear", "center", "big");
                 this.textRenderer.push("All clear", "side", "big");
-                this.textRenderer.push(`${this.allClear} +`, "side", "small");
-                this.score += this.allClear;
+                this.textRenderer.push(`${CLEAR_ALL} +`, "side", "small");
+                this.score += CLEAR_ALL;
                 this.playClearAll();
                 this.comboSound.resetNoSound();
+            }
+            if(this.spinBonus) {
+                const s =  SPIN_BONUS[lines.length - 1];
+                this.textRenderer.push(`${this.spinBonus.toUpperCase()}${s.name}`, "side", "big");
+                this.textRenderer.push(`${s.value} +  `, "side", "small");
+                this.score += s.value;
             } else {
-                const s =  this.lineScores[lines.length - 1];
-                const text = s[0] as string;
-                const score = s[1] as number;
-                this.textRenderer.push(text, "side", "big");
-                this.textRenderer.push(`${score} +  `, "side", "small");
-                this.score += score;
+                const s =  LINES_SCORES[lines.length - 1];
+                this.textRenderer.push(s.name, "side", "big");
+                this.textRenderer.push(`${s.value} +  `, "side", "small");
+                this.score += s.value;
             }
 
 
@@ -203,6 +210,7 @@ export class TetisEngine {
             this.comboSound.reset();
             this.settings.gravity +=  0.00001;
             this.hold.available = true;
+            this.spinBonus = undefined;
         }
         this.drop = false;
     };
@@ -218,33 +226,41 @@ export class TetisEngine {
             `Delta: ${delta.toFixed(2)}`,
             `Gravity: ${this.settings.gravity.toFixed(4)}`,
         ]);
-
+        this.rotation.update(delta);
+        //this.a = (this.a + (delta * 0.02)) % 360;
+        //v * Math.PI / 180
+        this.canvas.rotateDraw(this.rotation.value, () => {
         //this.controller.tick(delta);
-        this.boardRenderer.draw(delta);
-        this.holdRenderer.x = this.boardRenderer.ax - this.holdRenderer.width - 10;
-        this.holdRenderer.y = this.boardRenderer.ay;
-        if (this.hold.drop) {
-            this.holdRenderer.setPiece(this.hold.drop, Rotation.Zero, !this.hold.available);
-        } else {
-            this.holdRenderer.clear();
-        }
-        const bag = this.bag.peek(this.settings.bagItemsCount);
-        for (let i = 0; i < this.settings.bagItemsCount; i++) {
-            const renderer = this.queueRenderer[i];
-            renderer.x = this.boardRenderer.ax + this.boardRenderer.width + 10;
-            renderer.y = this.boardRenderer.ay + (i * renderer.height);
-            renderer.setPiece(bag[i]);
-            renderer.draw(delta);
-        }
+            this.boardRenderer.draw(delta);
+            this.holdRenderer.x = this.boardRenderer.ax - this.holdRenderer.width - 10;
+            this.holdRenderer.y = this.boardRenderer.ay;
+            if (this.hold.drop) {
+                this.holdRenderer.setPiece(this.hold.drop, Rotation.Zero, !this.hold.available);
+            } else {
+                this.holdRenderer.clear();
+            }
+            const bag = this.bag.peek(this.settings.bagItemsCount);
+            for (let i = 0; i < this.settings.bagItemsCount; i++) {
+                const renderer = this.queueRenderer[i];
+                renderer.x = this.boardRenderer.ax + this.boardRenderer.width + 10;
+                renderer.y = this.boardRenderer.ay + (i * renderer.height);
+                renderer.setPiece(bag[i]);
+                renderer.draw(delta);
+            }
 
-        if (!this.over) {
-            this.drop = this.falling.update(delta);
-        }
-        this.holdRenderer.draw(delta);
-        this.scoreRenderer.draw(delta);
-        this.textRenderer.draw(delta);
+            if (!this.over) {
+                this.drop = this.falling.update(delta);
+            }
+    
+            this.holdRenderer.draw(delta);
+            this.scoreRenderer.draw(delta);
+            this.textRenderer.draw(delta);
+
+        });
+        
     };
 
+    
     gameOver() {
         if (this.over) return;
         this.over = true;

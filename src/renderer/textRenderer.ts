@@ -24,15 +24,8 @@ export class TextRenderer implements Drawable {
 
     }
 
-
     push(text: string, type: TextType["type"], size: TextType["size"], duration = 1000) {
-        const t: TextType = {
-            duration,
-            time: 0,
-            size,
-            text,
-            type,
-        }; 
+        const t: TextType = { duration, time: 0, size, text, type }; 
         const destroy = () => {
             t.duration = 100;
             t.time == t.duration;
@@ -76,13 +69,13 @@ export class TextRenderer implements Drawable {
             if (text.type === "center") {
                 const x = this.board.ax + (this.board.width - this.board.width * 0.5) - this.getApproximateTextLen(t, text.size);
                 const y = this.board.ay + (this.board.height - this.board.height * 0.5) - size;
-                this.mainCanvas.ctx.fillText(t, x, y + yc);
+                this.mainCanvas.fillText(t, x, y + yc);
                 yc += size + this.padding;
             } else if (text.type === "side") {
                 const t = text.text;
                 const x = this.board.ax - this.getApproximateTextLen(t, text.size) * 2;
                 const y = this.holdRenderer.y + this.holdRenderer.height + size + this.padding;
-                this.mainCanvas.ctx.fillText(t, x, y + ys);
+                this.mainCanvas.fillText(t, x, y + ys);
                 ys += size + this.padding;
             }
 

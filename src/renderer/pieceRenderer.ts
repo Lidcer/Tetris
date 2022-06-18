@@ -73,7 +73,7 @@ export class PieceRenderer implements Drawable, CanvasBase {
         }
     }
     draw(_delta: number) {
-        this.mainCanvas.ctx.drawImage(this.canvas, this.x, this.y);
+        this.mainCanvas.drawImage(this.canvas, this.x, this.y);
     }
 
 

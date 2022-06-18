@@ -20,7 +20,7 @@ export class BoardRenderer implements Drawable, CanvasBase {
     private blocks: Block[][] = [];
     private dropAnimator: Animator= {
         progress: 1,
-        multiplayer: 0.008,
+        multiplayer: 0.007,
         easeFn: n => n,
         onFinish: noop,
     };
@@ -143,26 +143,26 @@ export class BoardRenderer implements Drawable, CanvasBase {
         }
 
         const off = this.blockSize * this.grid.offset;
-        this.mainCanvas.ctx.fillRect(this.ax - 1, this.ay - 1, this.width + 1, this.height + 1);
-        this.mainCanvas.ctx.drawImage(this.canvas, this.ax, this.ay - off);
+        this.mainCanvas.fillRect(this.ax - 1, this.ay - 1, this.width + 1, this.height + 1);
+        this.mainCanvas.drawImage(this.canvas, this.ax, this.ay - off);
         this.mainCanvas.ctx.fillStyle = "#ffffff";
         
         // left
         this.mainCanvas.ctx.beginPath();
-        this.mainCanvas.ctx.moveTo(this.ax - 1, this.ay - 1);
-        this.mainCanvas.ctx.lineTo(this.ax - 1,this.ay - 1 + this.height + 1);
+        this.mainCanvas.moveTo(this.ax - 1, this.ay - 1);
+        this.mainCanvas.lineTo(this.ax - 1,this.ay - 1 + this.height + 1);
         this.mainCanvas.ctx.stroke();
 
         // right
         this.mainCanvas.ctx.beginPath();
-        this.mainCanvas.ctx.moveTo(this.ax - 1 + this.width, this.ay - 1);
-        this.mainCanvas.ctx.lineTo(this.ax - 1 + this.width,this.ay - 1 + this.height + 1);
+        this.mainCanvas.moveTo(this.ax - 1 + this.width, this.ay - 1);
+        this.mainCanvas.lineTo(this.ax - 1 + this.width,this.ay - 1 + this.height + 1);
         this.mainCanvas.ctx.stroke();
 
         // bottom
         this.mainCanvas.ctx.beginPath();
-        this.mainCanvas.ctx.moveTo(this.ax - 1, this.ay - 1 + this.height);
-        this.mainCanvas.ctx.lineTo(this.ax - 1 + this.width,this.ay - 1 + this.height + 1);
+        this.mainCanvas.moveTo(this.ax - 1, this.ay - 1 + this.height);
+        this.mainCanvas.lineTo(this.ax - 1 + this.width,this.ay - 1 + this.height + 1);
         this.mainCanvas.ctx.stroke();
 
         //if (this.targetX > 0) {

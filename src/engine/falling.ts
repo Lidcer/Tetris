@@ -1,7 +1,9 @@
 import { Piece, pieces, PieceTypes, Rotation } from "../pieces";
 import { TetisEngine } from "./engine";
 import { PieceRotation, srsRotationDef } from "../rotations/srs";
+import { tRotationBonusDef } from "../rotationPoints/tspins";
 import { notes } from "./synthEngine";
+import { Scenario } from "../rotationPoints/pointsInterfaces";
 
 
 export class Falling {
@@ -9,7 +11,7 @@ export class Falling {
     private y = 1;
     private type: PieceTypes = "i";
     private r: Rotation = Rotation.Zero;
-
+    private lastRotation: "left" | "right" | "none" = "none";
     constructor(private engine: TetisEngine) {}
 
     setupNext(piece?: Piece) {
@@ -23,9 +25,91 @@ export class Falling {
         this.r = 0 ;
         this.type =  piece.type;
     }
-    rotEx() {
+    checkForBonus(scenario?: Scenario) {
+        if (!scenario) return false;
+
+        const checkScenario = (matrix: number[][]) =>{
+            for (let y = 0; y < matrix.length; y++) {
+                for (let x = 0; x < matrix[y].length; x++) { 
+                    const value = matrix[y][x];
+                    if (value) {
+                        const br =this.engine.board;
+                        const boardValue = br.at(x + this.ax, y + this.ay);
+                        if (!boardValue) return false;
+                    }
+                }
+            }
+            return true;
+        };
+
+        for (let i = 0; i < scenario.length; i++) {
+            const valid = checkScenario(scenario[i]);
+            if(valid) return true;
+        }
+        return false;
+    }
+    rotEx(cw?: boolean) {
         this.y = Math.floor(this.y) + 0.5;
+        const r = (bonus: boolean) => {
+            if (cw === undefined) {
+                if (this.lastRotation === "none" || this.lastRotation === "left") {
+                    this.lastRotation = "right";
+                    cw = true;
+                } else {
+                    this.lastRotation = "left";
+                    cw = false;
+                }
+            } else {
+                if (cw) {
+                    this.lastRotation = "right";
+                } else {
+                    this.lastRotation = "left";
+                }
+            }
+            if(bonus) {
+                const ani = this.engine.rotation;
+                const val = ani.value;
+
+                const d = (x: number) => x * Math.PI / 180;
+                const max = d(45);
+                const cv = d(val);
+                const rt = (1 - cv / max) * max;
+
+                // 0 - 10
+                const m = d(rt); 
+                if(cw) {
+                    ani.setAnimator(ani.value + m , 250);
+                } else {
+                    ani.setAnimator(ani.value - m, 250);
+                }
+
+            }
+
+        };
+
+        const c = () => {
+            r(false);
+            this.engine.audio.beepSmooth(notes["C3"], 0.01, 0.01, "triangle");
+        };
+        const s = () => {
+            r(true);
+            this.engine.audio.beepSmooth(notes["A6"], 0.1, 0.1, "sine");
+        };
         this.engine.audio.beepSmooth(notes["C3"], 0.01, 0.01, "triangle");
+        if(this.engine.settings.spinBonus === "t-spins") {
+            const bonus = tRotationBonusDef[this.type];
+            const bb = this.checkForBonus(bonus);
+            if(bb) {
+                s();
+                this.engine.spinBonus = this.type;
+            } else {
+                c();
+                this.engine.spinBonus = undefined;
+            }
+        } else {
+            c();
+            this.engine.spinBonus = undefined;
+        }
     }
 
     isColliding(ax: number, ay: number) {
@@ -80,7 +164,7 @@ export class Falling {
         if (!this.isColliding(this.ax, this.ay + 1)) {
             this.y += 1;
             this.engine.score++;
-            this.y = Math.round(this.y);
+            this.y = Math.round(this.y) - .5;
             this.engine.audio.beepSmooth(notes["A1"], 0.01, 0.01, "square");
         }
     }
@@ -122,7 +206,7 @@ export class Falling {
     get rotationSystem() {
         return this.engine.settings.rotationSystem;
     }
-    performKickTable(kickTableDef: {[key in PieceTypes]: PieceRotation }, reverse: boolean) {
+    performKickTable(kickTableDef: {[key in PieceTypes]: PieceRotation }, reverse?: boolean) {
         const kickTable = kickTableDef[this.type].kickTable[this.r];
         const backup = {
             x: this.x,
@@ -140,7 +224,7 @@ export class Falling {
                 this.y -= kickTable[i][1];
             }
             if(!this.isColliding(this.ax, this.ay)) {
-                this.rotEx();
+                this.rotEx(reverse);
                 return true;
             }
         }
@@ -153,7 +237,7 @@ export class Falling {
         const next = (rotationIndex + 2) % pieces[this.type].shape.length;
         this.r = next;
         if (this.rotationSystem === "SRS") {
-            if (!this.performKickTable(srsRotationDef, true)) {
+            if (!this.performKickTable(srsRotationDef)) {
                 this.r = rotationIndex;
             }
         } else {
@@ -176,7 +260,7 @@ export class Falling {
             if (this.isColliding(this.ax, this.ay)) {
                 this.r = rotationIndex;
             } else {
-                this.rotEx();
+                this.rotEx(true);
             }
         }
     }
@@ -195,7 +279,7 @@ export class Falling {
             if (this.isColliding(this.ax, this.ay)) {
                 this.r = rotationIndex;
             } else {
-                this.rotEx();
+                this.rotEx(false);
             }
         }
     }

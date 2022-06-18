@@ -4,6 +4,7 @@ export class Settings {
     shadowPiece = true;
     allow180 = true;
     rotationSystem: "none" | "SRS" = "SRS";
+    spinBonus: "none" | "stupid" | "all" | "t-spins" = "t-spins";
     handling = {
         DAS: 200,
         ARR: 50,
