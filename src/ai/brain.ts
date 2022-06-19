@@ -2,10 +2,10 @@ import { Output } from "./controller";
 import { pieces, PieceTypes, Rotation } from "../pieces";
 import { TetisEngine } from "../engine/engine";
 import { RenderLoop } from "../engine/renderLoop";
-import { generateBoardOnCurrentFalling, FallingData, getBoardCost, getShapeWidth, getBoardBlockHeight } from "./aiUtils";
+import { generateBoardOnCurrentFalling, FallingData, getBoardCost, getShapeWidth, getBoardBlockHeight, Weights } from "./aiUtils";
 import { Board } from "../engine/board";
 import { SeededMath } from "../engine/seededMath";
-import { random } from "lodash";
+import { filter, random } from "lodash";
 
 interface BoardScoreObj {
     board: Board;
@@ -13,11 +13,18 @@ interface BoardScoreObj {
     piece: FallingData;
 }
 
+const weights: Weights ={
+    heightWeight: 0.510066,
+    linesWeight: 0.760666,
+    holesWeight: 0.35663,
+    bumpinessWeight: 0.184483
+};
+
 //WIP
 export class AI {
     private loop: RenderLoop;
     private controller = new Output(window);
-    constructor(private engine: TetisEngine, private seed = random(1000, 5000), speed = 50) {
+    constructor(private engine: TetisEngine, private seed = random(1000, 5000), speed = 0) {
         this.loop = new RenderLoop(this.tick, speed);
     }
 
@@ -32,14 +39,13 @@ export class AI {
 
     compareBoards = (a: BoardScoreObj, b: BoardScoreObj) => {
         const bad = a.cost > b.cost;
-        return bad ? 1 : -1;
+        return bad ? -1 : 1;
     };
 
     getBestBoard(boards: BoardScoreObj[]) {
         const seeded = new SeededMath(this.seed);
         boards.sort(this.compareBoards);
         const sampleBoard = boards[0];
-        
         const samples = boards.filter(e => e.cost === sampleBoard.cost && e.cost === sampleBoard.cost); 
         return seeded.sample(samples)!;
     }
@@ -48,10 +54,10 @@ export class AI {
         const engineFalling = this.engine["falling"]; 
         const boards = [this.getPieceAllBoards(engineFalling["type"])];
         
-        if (this.engine.hold.available){
-            const a = this.engine.hold.drop || this.engine.bag.peek(1)[0];
-            boards.push(this.getPieceAllBoards(a));
-        }
+        // if (this.engine.hold.available) {
+        //     const a = this.engine.hold.drop || this.engine.bag.peek(1)[0];
+        //     boards.push(this.getPieceAllBoards(a));
+        // }
         const best = this.getBestBoard(boards[0]);
         if (boards[1]) {
             const holdBest = this.getBestBoard(boards[1]);
@@ -64,7 +70,7 @@ export class AI {
     }
 
     boardScore(board: Board, piece?: FallingData): BoardScoreObj {
-        const score = getBoardCost(board);
+        const score = getBoardCost(board, weights);
         const obj: Partial<BoardScoreObj> = {
             board,
             cost: score,
@@ -106,7 +112,8 @@ export class AI {
             // }
             // console.log(a);
             // console.log(board.score, currentScore.score);
-        }       
+        }     
+          
 
         return boards;
     }
@@ -122,41 +129,60 @@ export class AI {
 
         const px = piece.x;
         const fx = falling.x - 1;
-        if (piece.r !== falling["r"]) {
-            if (
-                (falling["r"] === Rotation.Zero && piece.r === Rotation.UpsideDown) || 
-                (falling["r"] === Rotation.Left && piece.r === Rotation.Right) || 
-                (falling["r"] === Rotation.Right && piece.r === Rotation.Left) || 
-                (falling["r"] === Rotation.UpsideDown && piece.r === Rotation.Zero)
-            ) {
-                this.controller.c180();
-            } else if (
-                (falling["r"] === Rotation.Zero && piece.r === Rotation.Right) || 
-                (falling["r"] === Rotation.Right && piece.r === Rotation.UpsideDown) || 
-                (falling["r"] === Rotation.UpsideDown && piece.r === Rotation.Left) || 
-                (falling["r"] === Rotation.Left && piece.r === Rotation.Zero)
-            ) {
-            
-                this.controller.cw();
-            } else {
-                this.controller.ccw();
+        const checks = [piece.r !== falling["r"], px > fx, px < fx];
+        if(checks.find(e => e === true)) {
+            let i = -1;
+            while(true) {
+                if (checks[i] === true) {
+                    break;
+                }
+                i = random(0, checks.length);
             }
 
-        } else if (px > fx) {
-            this.controller.right();
-        } else if (px < fx) {
-            this.controller.left();
-        } else {
+            switch (i) {
+            case 0: {
+                if (
+                    (falling["r"] === Rotation.Zero && piece.r === Rotation.UpsideDown) || 
+                        (falling["r"] === Rotation.Left && piece.r === Rotation.Right) || 
+                        (falling["r"] === Rotation.Right && piece.r === Rotation.Left) || 
+                        (falling["r"] === Rotation.UpsideDown && piece.r === Rotation.Zero)
+                ) {
+                    this.controller.c180();
+                } else if (
+                    (falling["r"] === Rotation.Zero && piece.r === Rotation.Right) || 
+                        (falling["r"] === Rotation.Right && piece.r === Rotation.UpsideDown) || 
+                        (falling["r"] === Rotation.UpsideDown && piece.r === Rotation.Left) || 
+                        (falling["r"] === Rotation.Left && piece.r === Rotation.Zero)
+                ) {
+                    
+                    this.controller.cw();
+                } else {
+                    this.controller.ccw();
+                }
+                break;
+            }
+            case 1: {
+                this.controller.right();
+                break;
+            }
+            case 2: {
+                this.controller.left();
+                break;
+            } 
+            
+            default:
+                break;
+            }
+
+        } else  {
             const y = this.engine.board.height - falling.ay;
             if (getBoardBlockHeight(this.engine.board) + 5 > (y)) {
                 this.controller.hardDrop();
                 this.seed = (new SeededMath(this.seed)).randomInteger(0, 99999);
             } else {
-                //this.controller.hardDrop();
                 this.controller.softDrop();
             }
         }
-    
     };
 
 }

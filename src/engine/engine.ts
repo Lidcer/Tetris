@@ -285,5 +285,4 @@ export class TetisEngine {
         this.hold.drop = "";
         this.board.clearBoard();
     }
-
 }

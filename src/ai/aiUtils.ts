@@ -8,6 +8,14 @@ export interface FallingData {
     r: Rotation;
 }
 
+export interface Weights { 
+    heightWeight: number;
+    linesWeight: number;
+    holesWeight: number;
+    bumpinessWeight: number;
+}
+
+
 function hasLineAnyBlock(board: Board, line: number) {
     for (let x = 0; x < board.width; x++) {
         const value = board.at(x, line);
@@ -24,6 +32,21 @@ export function getBoardBlockHeight(board: Board) {
     }
     return c;
 }
+export function columHeight(board: Board) {
+    let total = 0;
+    for (let x = 0; x < board.width; x++) {
+        let height = 0;
+        for (let y = board.height - 1; y >= 0; y--) {
+            if(board.at(x, y) !== "") {
+                height = board.height - y;
+    
+            }
+        }
+        total += height;
+    }
+    return total;
+}
+
 
 function isColliding(shape: number[][], board: Board, ax: number, ay: number) {
     // if (ay < 0) {
@@ -89,88 +112,60 @@ export function generateBoardOnCurrentFalling(board: Board, falling: FallingData
 
     return copy;
 }
-export function getBoardCost(board: Board): number {
-    let cost = 0;
-    const height = getBoardBlockHeight(board);
-    const max = board.height * board.height;
-    for (let y = 0; y < board.height; y++) {
-        const iy = board.height - y - 1;
-        const hasLine = hasLineAnyBlock(board, iy);
-        if (!hasLine) continue;
 
-        for (let x = 0; x < board.width; x++) {
-            const isEmpty = board.at(x, iy) === "";
-            if (isEmpty) {
-                cost++;
-                let additionalCost = max;
-                for (let yy = iy + 1; yy > 0; yy--) {
-                    const checkY = yy - 1;
-                    if (checkY > 0 && checkY < board.height) {
-                        const isFilled = board.at(x, checkY) !== "";
-                        if (isFilled) {
-                            let sideHoles = 0;
-                            if (x + 1 < board.width) {
-                                if (board.at(x + 1, checkY) !== "") {
-                                    sideHoles += additionalCost;
-                                }
-                            } else {
-                                sideHoles += additionalCost;
-                            }
-                            if (x - 1 >= 0) {
-                                if (board.at(x -1, checkY) !== "") {
-                                    sideHoles += additionalCost;
-                                }
-                            } else {
-                                sideHoles += additionalCost;
-                            }
-            
-                            cost += additionalCost + sideHoles + iy;
-                            additionalCost++;
-                        }
-                    }
-                }
+export function lines(board: Board) {
+    let count = 0;
+    for(let r = 0; r < board.height; r++){
+        if (isLine(r, board)){
+            count++;
+        }
+    }
+    return count;
+}
+
+export function getBoardCost(board: Board, weights: Weights): number {
+    const hi = -weights.heightWeight * columHeight(board);
+    const l = weights.linesWeight * lines(board);
+    const ho = weights.holesWeight * holes(board);
+    const b = weights.bumpinessWeight * bumpiness(board);
+
+    const cost = hi + l - ho - b;
+    return cost;
+}
+export function bumpiness(board: Board) {
+    let total = 0;
+    for(let c = 0; c < board.width - 1; c++){
+        total += Math.abs(columnHeight(c, board) - columnHeight(c + 1, board));
+    }
+    return total;
+}
+export function columnHeight(column: number, board: Board) {
+    let r = 0;
+    for(; r < board.height && board.at(column, r) === ""; r++);
+    return board.height - r;
+}
+export function isLine(row: number, board: Board): boolean {
+    for(let c = 0; c < board.width; c++){
+        if (board.at(c, row) === ""){
+            return false;
+        }
+    }
+    return true;
+}
+export function holes(board: Board) {
+    let count = 0;
+    for(let c = 0; c < board.width; c++) {
+        let block = false;
+        for(let r = 0; r < board.height; r++) {
+            if (board.at(c, r) != "") {
+                block = true;
+            } else if (board.at(c, r) == "" && block){
+                count++;
             }
         }
     }
-    cost += height * max * max;
-    cost = Math.round(cost);
-    // for (let y = 0; y < board.height; y++) {
-    //     const hasLine = hasLineAnyBlock(board, y);
-    //     if (hasLine) {
-
-    //         let blocks = board.width;
-    //         let lineScore = 0;
-    //         for (let x = 0; x < board.width; x++) {
-    //             const value = board.at(x, y);
-    //             if (!value) {
-    //                 blocks--;
-    //                 lineScore += 1 + y + blocks;
-    //                 for (let i = 0; i < 3; i++) {
-    //                     const ii = i - 1 + x;
-    //                     const jj = y + 1;
-    //                     if(ii > 0 &&  x < board.width - 1 && y > 0 && y < board.height - 1) {
-    //                         const value = board.at(ii, jj);
-    //                         const value2 = board.at(ii, y);
-    //                         if (value && value2) {
-    //                             lineScore += lineScore * 5;
-    //                         }
-    //                     } else {
-    //                         lineScore += lineScore;
-    //                     }  
-    //                 }
-
-    //             }
-    //         }
-    //         if (blocks) {
-    //             score += lineScore;
-    //         } else {
-    //             score -= lineScore;
-    //         }
-    //     }
-    // }
-    return cost;
+    return count;
 }
-
 
 export function getShapeWidth(shape:number[][]) {
     let i = 0;
