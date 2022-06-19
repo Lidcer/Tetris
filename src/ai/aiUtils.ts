@@ -1,4 +1,4 @@
-import { Board, GridPieceTypes } from "../engine/board";
+import { Board } from "../engine/board";
 import { pieces, PieceTypes, Rotation } from "../pieces";
 
 export interface FallingData {
@@ -6,10 +6,6 @@ export interface FallingData {
     y: number;
     type: PieceTypes;
     r: Rotation;
-}
-export interface BoardScore {
-    badScore: number;
-    height: number;
 }
 
 function hasLineAnyBlock(board: Board, line: number) {
@@ -53,18 +49,6 @@ function isColliding(shape: number[][], board: Board, ax: number, ay: number) {
     return false;
 }
 
-function writeShape(ax: number, ay: number, shape: number[][], board: Board, type: GridPieceTypes) {
-    for (let y = 0; y < shape.length; y++) {
-        for (let x = 0; x < shape[y].length; x++) {
-            const value = shape[y][x];
-            if (value) {
-                const xx = ax + x;
-                const yy = ay + y - 1;
-                board.set(xx, yy, type);
-            }
-        }
-    }
-}
 
 export function generateBoardOnCurrentFalling(board: Board, falling: FallingData) {
     const copy = new Board(board["_width"], board["_height"]);
@@ -94,7 +78,7 @@ export function generateBoardOnCurrentFalling(board: Board, falling: FallingData
             if (value) {
                 const xx = ax + x;
                 const yy = y + lastI;
-                if(xx >= copy.width) {
+                if(xx >= copy.width || xx < 0) {
                     return undefined;
                 }
                 copy.set(xx, yy, type);
@@ -105,25 +89,86 @@ export function generateBoardOnCurrentFalling(board: Board, falling: FallingData
 
     return copy;
 }
-export function getBoardBadScore(board: Board): BoardScore {
-    let score = 0;
-    for (let y = board.height - 1; y >= 0; y--) {
-        const hasLine = hasLineAnyBlock(board, y);
-        if (hasLine) {
-            let line = board.width;
-            for (let x = 0; x < board.width; x++) {
-                const value = board.at(x, y);
-                if (!value) {
-                    line--;
-                    score += 1 + y + line;
+export function getBoardCost(board: Board): number {
+    let cost = 0;
+    const height = getBoardBlockHeight(board);
+    const max = board.height * board.height;
+    for (let y = 0; y < board.height; y++) {
+        const iy = board.height - y - 1;
+        const hasLine = hasLineAnyBlock(board, iy);
+        if (!hasLine) continue;
+
+        for (let x = 0; x < board.width; x++) {
+            const isEmpty = board.at(x, iy) === "";
+            if (isEmpty) {
+                cost++;
+                let additionalCost = max;
+                for (let yy = iy + 1; yy > 0; yy--) {
+                    const checkY = yy - 1;
+                    if (checkY > 0 && checkY < board.height) {
+                        const isFilled = board.at(x, checkY) !== "";
+                        if (isFilled) {
+                            let sideHoles = 0;
+                            if (x + 1 < board.width) {
+                                if (board.at(x + 1, checkY) !== "") {
+                                    sideHoles += additionalCost;
+                                }
+                            } else {
+                                sideHoles += additionalCost;
+                            }
+                            if (x - 1 >= 0) {
+                                if (board.at(x -1, checkY) !== "") {
+                                    sideHoles += additionalCost;
+                                }
+                            } else {
+                                sideHoles += additionalCost;
+                            }
+            
+                            cost += additionalCost + sideHoles + iy;
+                            additionalCost++;
+                        }
+                    }
                 }
             }
         }
     }
-    return {
-        badScore: score,
-        height: getBoardBlockHeight(board)
-    };
+    cost += height * max * max;
+    cost = Math.round(cost);
+    // for (let y = 0; y < board.height; y++) {
+    //     const hasLine = hasLineAnyBlock(board, y);
+    //     if (hasLine) {
+
+    //         let blocks = board.width;
+    //         let lineScore = 0;
+    //         for (let x = 0; x < board.width; x++) {
+    //             const value = board.at(x, y);
+    //             if (!value) {
+    //                 blocks--;
+    //                 lineScore += 1 + y + blocks;
+    //                 for (let i = 0; i < 3; i++) {
+    //                     const ii = i - 1 + x;
+    //                     const jj = y + 1;
+    //                     if(ii > 0 &&  x < board.width - 1 && y > 0 && y < board.height - 1) {
+    //                         const value = board.at(ii, jj);
+    //                         const value2 = board.at(ii, y);
+    //                         if (value && value2) {
+    //                             lineScore += lineScore * 5;
+    //                         }
+    //                     } else {
+    //                         lineScore += lineScore;
+    //                     }  
+    //                 }
+
+    //             }
+    //         }
+    //         if (blocks) {
+    //             score += lineScore;
+    //         } else {
+    //             score -= lineScore;
+    //         }
+    //     }
+    // }
+    return cost;
 }
 
 
@@ -142,20 +187,3 @@ export function getShapeWidth(shape:number[][]) {
     }
     return i;
 }
-
-const board = new Board(10, 20);
-const board2 = new Board(10, 20);
-
-board.set(0,19, "t");
-board.set(1,19, "t");
-board.set(2,19, "t");
-board.set(2,18, "t");
-
-
-board2.set(0,18, "t");
-board2.set(1,18, "t");
-board2.set(2,18, "t");
-board2.set(2,19, "t");
-
-console.log(getBoardBadScore(board));
-console.log(getBoardBadScore(board2));

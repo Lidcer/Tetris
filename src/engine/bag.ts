@@ -1,5 +1,6 @@
 import { PieceTypes } from "../pieces";
-import { sample } from "lodash";
+import { random, sample } from "lodash";
+import { SeededMath } from "./seededMath";
 export enum Mode {
     Bag7,
     Bag14,
@@ -11,14 +12,16 @@ export enum Mode {
 
 export class Bag {
     private readonly renderDistance = 28;
+    private seededMath: SeededMath;
     private pieces: PieceTypes[] = ["i", "j", "l", "s", "z", "o", "t",];
     private queue: PieceTypes[] = [];
-    constructor(private mode: Mode) {
+    constructor(private mode: Mode, seed?: number) {
+        this.seededMath = new SeededMath(seed ? seed : random(0,999999));
         this.fillQueue();
     }
 
     private shuffle<T = any[]>(array: T[]): T[] {
-        return array.sort(()=> Math.random() < 0.5 ? 1 : -1);
+        return array.sort(() => this.seededMath.random() < 0.5 ? 1 : -1);
     }
     private fillQueue() {
         while(this.queue.length < this.renderDistance) {

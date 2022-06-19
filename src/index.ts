@@ -4,7 +4,7 @@ import { InitSettings } from "./InitSettings";
 import { AI } from "./ai/brain";
 
 
-const tetris = new TetisEngine();
+const tetris = new TetisEngine(InitSettings.seed);
 tetris.start();
 
 if (InitSettings.expose) {
@@ -12,7 +12,7 @@ if (InitSettings.expose) {
 }
 
 if (InitSettings.ai) {
-    const ai = new AI(tetris);
+    const ai = new AI(tetris, InitSettings.seed);
     ai.start();
     attachDebugMethod("ai", ai);
 } else {

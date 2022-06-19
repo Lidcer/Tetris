@@ -9,4 +9,15 @@ export class InitSettings {
         return a("ai") !== null;
     }
 
+    static get seed() {
+        const seed = a("seed");
+        if(seed !== null) {
+            const int = parseInt(a("seed"), 10);
+            if(!isNaN(int)) {
+                return int;
+            }
+        }
+        return undefined;
+    }
+
 }

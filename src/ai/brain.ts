@@ -2,20 +2,22 @@ import { Output } from "./controller";
 import { pieces, PieceTypes, Rotation } from "../pieces";
 import { TetisEngine } from "../engine/engine";
 import { RenderLoop } from "../engine/renderLoop";
-import { BoardScore, generateBoardOnCurrentFalling, FallingData, getBoardBadScore, getShapeWidth, getBoardBlockHeight } from "./aiUtils";
+import { generateBoardOnCurrentFalling, FallingData, getBoardCost, getShapeWidth, getBoardBlockHeight } from "./aiUtils";
 import { Board } from "../engine/board";
+import { SeededMath } from "../engine/seededMath";
+import { random } from "lodash";
 
 interface BoardScoreObj {
     board: Board;
-    score: BoardScore;
-    peice: FallingData;
+    cost: number;
+    piece: FallingData;
 }
 
 //WIP
 export class AI {
     private loop: RenderLoop;
     private controller = new Output(window);
-    constructor(private engine: TetisEngine, speed = 25) {
+    constructor(private engine: TetisEngine, private seed = random(1000, 5000), speed = 50) {
         this.loop = new RenderLoop(this.tick, speed);
     }
 
@@ -29,17 +31,17 @@ export class AI {
     }
 
     compareBoards = (a: BoardScoreObj, b: BoardScoreObj) => {
-        const bad = a.score.badScore > b.score.badScore;
-        if (a.score.height === a.score.height) {
-            return bad ? 1 : -1;
-        }  else {
-            return a.score.height > a.score.height ? 1 : -1;
-        }
+        const bad = a.cost > b.cost;
+        return bad ? 1 : -1;
     };
 
     getBestBoard(boards: BoardScoreObj[]) {
+        const seeded = new SeededMath(this.seed);
         boards.sort(this.compareBoards);
-        return boards[0];
+        const sampleBoard = boards[0];
+        
+        const samples = boards.filter(e => e.cost === sampleBoard.cost && e.cost === sampleBoard.cost); 
+        return seeded.sample(samples)!;
     }
 
     getBestPicePos() {
@@ -58,7 +60,20 @@ export class AI {
                 return null;
             }
         }
-        return best.peice;
+        return best.piece;
+    }
+
+    boardScore(board: Board, piece?: FallingData): BoardScoreObj {
+        const score = getBoardCost(board);
+        const obj: Partial<BoardScoreObj> = {
+            board,
+            cost: score,
+        };
+        
+        if(piece) {
+            obj.piece = piece;
+        }
+        return obj as BoardScoreObj;
     }
 
     getPieceAllBoards(type: PieceTypes): BoardScoreObj[] {
@@ -67,28 +82,32 @@ export class AI {
 
         for (const rotation of rotations) {
             const width = getShapeWidth(pieces[type].shape[rotation]);
-            for (let x = 0; x < this.engine.board.width + width; x++) {
-                const block: FallingData = {
-                    type,
-                    r: rotation,
-                    x,
-                    y: 0,
-                };
+            for (let x = -width; x < this.engine.board.width + width; x++) {
+                const block: FallingData = { type, r: rotation, x, y: 0 };
                 fallingDatas.push(block);
             }
         }
+        const currentScore = this.boardScore(this.engine.board);
         const boards = fallingDatas.map(d => {
             const board = generateBoardOnCurrentFalling(this.engine.board, d);
             if (!board) return;
-            const score = getBoardBadScore(board);
-            const peice = d;
-            return {
-                board,
-                score,
-                peice,
-            };
-
+            return this.boardScore(board, d);
+            
         }).filter(e => e);
+        for (const board of boards) {
+            board.cost -= currentScore.cost;
+            // let a = "";
+            // for (let y = 0; y < board.board["grid"].length; y++) {
+            //     for (let x = 0; x < board.board["grid"][y].length; x++) {
+            //         const e = board.board["grid"][y][x];
+            //         a += e ? e : "_";
+            //     }
+            //     a += "\n";
+            // }
+            // console.log(a);
+            // console.log(board.score, currentScore.score);
+        }       
+
         return boards;
     }
 
@@ -131,7 +150,9 @@ export class AI {
             const y = this.engine.board.height - falling.ay;
             if (getBoardBlockHeight(this.engine.board) + 5 > (y)) {
                 this.controller.hardDrop();
+                this.seed = (new SeededMath(this.seed)).randomInteger(0, 99999);
             } else {
+                //this.controller.hardDrop();
                 this.controller.softDrop();
             }
         }

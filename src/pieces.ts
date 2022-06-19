@@ -1,4 +1,4 @@
-export type PieceTypes = "i" | "j" | "l" | "s" | "z" | "o" | "t";
+export type PieceTypes = "i" | "j" | "l" | "s" | "z" | "o" | "t" | "g";
 export enum Rotation  {
     Zero,
     Right,

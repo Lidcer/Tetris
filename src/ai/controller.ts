@@ -1,4 +1,3 @@
-import { random } from "lodash";
 import { LEFT, RIGHT, SOFT_DROP, ROTATE_CW, HARD_DROP, ROTATE_CCW, ROTATE180, HOLD, KeyDef
 } from "../engine/controller";
 function createEvent(down: boolean, keyDef: KeyDef) {
@@ -8,7 +7,7 @@ function createEvent(down: boolean, keyDef: KeyDef) {
     // mockEvent.target = document.body // doesn't work because key is readonly
     
     // patching
-    Object.defineProperty(mockEvent, "target", {get() {return document.body}})
+    Object.defineProperty(mockEvent, "target", {get() {return document.body; }});
     return mockEvent;
 }
 export class Output {
@@ -24,7 +23,7 @@ export class Output {
         }
     }
     private random() {
-        return random(5, 10);
+        return 1;
     }
     private createRelease(key: KeyDef) {
         const t = setTimeout(() => {

@@ -55,9 +55,9 @@ export class TetisEngine {
             drop: "",
         };
 
-    constructor() {
+    constructor(seed?: number) {
         this.canvas = new Canvas();
-        this.bag = new Bag(Mode.Bag7);
+        this.bag = new Bag(Mode.Bag7, this.settings.seed || seed);
         this.board = new Board(10, 20);   
         this.boardRenderer = new BoardRenderer(this.canvas, this.board, 30);
         this.holdRenderer = new PieceRenderer(this.canvas);

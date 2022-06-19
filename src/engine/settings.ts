@@ -3,6 +3,7 @@ export class Settings {
     bagItemsCount = 5; 
     shadowPiece = true;
     allow180 = true;
+    seed: number;
     rotationSystem: "none" | "SRS" = "SRS";
     spinBonus: "none" | "stupid" | "all" | "t-spins" = "t-spins";
     handling = {
